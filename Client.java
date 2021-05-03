@@ -44,44 +44,6 @@ class Client {
         return message;
     }
 
-    // Reads XML file by traversing the file tree hierarchically
-    public static void retrieveXML() {
-        try {
-            File inputFile = new File("./ds-system.xml");
-
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(inputFile);
-
-            doc.getDocumentElement().normalize();
-
-            NodeList servernodelist = doc.getElementsByTagName("server");
-
-            for (int i = 0; i < servernodelist.getLength(); i++) {
-                Node node = servernodelist.item(i);
-
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    Element tElement = (Element) node;
-                    servlist.add(new Object[] { tElement.getAttribute("type"), tElement.getAttribute("coreCount"), tElement.getAttribute("limit") });
-                }
-            }
-        }
-
-        catch (Exception e) {
-            System.out.println(e);
-        }
-    }
-
-    // Pull largest server name
-    public static String XMLFileParser() {
-        return servlist.get(servlist.size() - 1)[0].toString();
-    }
-
-    // Pull limit of largest server
-    public static String XMLLimit() {
-        return servlist.get(servlist.size() - 1)[2].toString();
-    }
 
     public static void performHandshake(DataInputStream din, DataOutputStream dout) {
         sendMsg(dout, "HELO");
@@ -96,36 +58,14 @@ class Client {
         DataOutputStream dout = new DataOutputStream(s.getOutputStream());
 
         // Pull ds-system.xml, grab type, coreCount and limit
-        retrieveXML();
 
         // Start handshake
         performHandshake(din, dout);
 
         // Ready to start receiving jobs
         sendMsg(dout, "REDY");
-        int count = 0;
         String response = readMsg(din);
-        while (!response.contains("NONE")) {
-            if (response.contains("JOBN")) {
-                sendMsg(dout, "SCHD " + response.split("\\s+")[2] + " " + XMLFileParser() + " " + count);
-                response = readMsg(din);
-
-                // Check for errors, if error found, send to the next server
-                if (response.contains("ERR")) {
-                    count++;
-                    // Reset count to send to first server, otherwise will reach out of bounds and try to send to servers that dont exist
-                    if (count == Integer.parseInt(XMLLimit())) {
-                        count = 0;
-                    }
-                    sendMsg(dout, "SCHD " + response.split("\\s+")[2] + XMLFileParser() + " " + count);
-                    response = readMsg(din);
-                }
-
-            }
-            // Ready for next job
-            sendMsg(dout, "REDY");
-            response = readMsg(din);
-        }
+        
 
         // Quit
         sendMsg(dout, "QUIT");
