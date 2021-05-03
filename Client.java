@@ -2,17 +2,9 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
+
 
 class Client {
-
-    static List<Object[]> servlist = new ArrayList<>();
 
     public static void sendMsg(DataOutputStream dout, String msg) {
         try {
@@ -57,15 +49,51 @@ class Client {
         DataInputStream din = new DataInputStream(s.getInputStream());
         DataOutputStream dout = new DataOutputStream(s.getOutputStream());
 
-        // Pull ds-system.xml, grab type, coreCount and limit
-
         // Start handshake
         performHandshake(din, dout);
 
         // Ready to start receiving jobs
         sendMsg(dout, "REDY");
         String response = readMsg(din);
+        String[] job = response.split("\\s+");
+
+
+        sendMsg(dout, "GETS Capable " + job[4] + " " + job[5] + " "+ job[6]);
+        readMsg(din);
         
+        sendMsg(dout, "OK");
+        response = readMsg(din);
+        String[] server = response.split("\\s+");
+        ArrayList<Server> serverList = new ArrayList<Server>();
+
+        for (int i = 0; i < server.length - 1; i += 9){
+            Server newServer = new Server();
+            newServer.setServerType(server[i]);
+            newServer.setServerID(Integer.parseInt(server[i+1]));
+            newServer.setState(server[i+2]);
+            newServer.setCurStartTime(Integer.parseInt(server[i+3]));
+            newServer.setCore(Integer.parseInt(server[i+4]));
+            newServer.setMem(Integer.parseInt(server[i+5]));
+            newServer.setDisk(Integer.parseInt(server[i+6]));
+            newServer.setWJobs(Integer.parseInt(server[i+7]));
+            newServer.setRJobs(Integer.parseInt(server[i+8]));
+            serverList.add(newServer);
+        }
+
+        for(int i = 0; i < serverList.size(); i ++ ){
+            System.out.print(serverList.get(i).serverType + " ");
+            System.out.print(serverList.get(i).serverID + " ");
+            System.out.print(serverList.get(i).state + "\n\n");
+        }
+
+        sendMsg(dout, "OK");
+        readMsg(din);
+
+        sendMsg(dout, "SCHD " + job[2] + " " + server[0] + " " + server[1]);
+        readMsg(din);
+
+        sendMsg(dout, "REDY");
+        readMsg(din);
 
         // Quit
         sendMsg(dout, "QUIT");
