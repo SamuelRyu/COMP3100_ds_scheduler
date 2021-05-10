@@ -1,3 +1,4 @@
+// Object that defines the individual Servers
 public class Server {
     String serverType;
     int serverID;
@@ -9,6 +10,7 @@ public class Server {
     int wJobs;
     int rJobs;
 
+    // Constructors
     public Server(String serverType, int serverID, String state, int curStartTime, int core, int mem, int disk, int wJobs, int rJobs){
         this.serverType = serverType;
         this.serverID = serverID;
@@ -23,6 +25,7 @@ public class Server {
 
     public Server(){};
 
+    // Getters
     public String getServerType(){
         return this.serverType;
     }
@@ -51,6 +54,7 @@ public class Server {
         return this.rJobs;
     }
 
+    // Setters
     public void setServerType(String serverType){
         this.serverType = serverType;
     }
