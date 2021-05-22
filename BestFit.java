@@ -7,5 +7,6 @@ public class BestFit {
 
     public void runBestFit(){
         System.out.println("Best Fit Ran");
+        
     }
 }

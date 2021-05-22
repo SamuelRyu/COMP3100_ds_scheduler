@@ -34,6 +34,12 @@ class Client {
         } else if(alg.equals("-wf")){
             WorstFit f = new WorstFit(c);
             f.runWorstFit();
+        } else if(alg.equals("-c")){
+            Custom f = new Custom(c);
+            f.runCustom();
+        } else {
+            System.out.println("Algorithm doesn't exist.");
+            System.exit(1);
         }
         
         
