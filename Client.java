@@ -25,18 +25,9 @@ class Client {
         }
         
         // Choose Algorithm
-        if (alg.equals("-ff")){
-            FirstFit f = new FirstFit(c);
-            f.runFirstFit();
-        } else if(alg.equals("-bf")){
-            BestFit f = new BestFit(c);
-            f.runBestFit();
-        } else if(alg.equals("-wf")){
-            WorstFit f = new WorstFit(c);
-            f.runWorstFit();
-        } else if(alg.equals("-c")){
-            Custom f = new Custom(c);
-            f.runCustom();
+        if (alg.equals("-cf")){
+            CustomFit f = new CustomFit(c);
+            f.runCustomFit();
         } else {
             System.out.println("Algorithm doesn't exist.");
             System.exit(1);
