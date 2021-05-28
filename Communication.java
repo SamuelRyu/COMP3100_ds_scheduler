@@ -23,7 +23,7 @@ public class Communication {
             message = Arrays.copyOf(message, message.length + 1);
             message[message.length - 1] = 10;
             dout.write(message);
-            System.out.println("SENT " + msg);
+            // System.out.println("SENT " + msg);
             dout.flush();
 
     }
@@ -32,15 +32,14 @@ public class Communication {
     //  creates byte array with size of the estimate number of bytes that can be read, additional size for security
     //  adds each byte casted to String
     public String readMsg() throws IOException{
-        String message = "";
+        String message = din.readLine();
 
-        byte inBytes[] = new byte[din.available() + 64];
-        din.read(inBytes);
-        for (int i = 0; i < inBytes.length; i++) {
-            message += (char) inBytes[i];
+        while(din.available() > 0){
+            message += "\n" + din.readLine();
         }
 
-        System.out.println("RCVD " + message);
+        // System.out.println("RCVD " + message);
+
         return message;
     }
 }

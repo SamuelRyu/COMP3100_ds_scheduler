@@ -33,6 +33,7 @@ class Client {
             System.exit(1);
         }
         
+        c.sendMsg("QUIT");
         
         p.close();
     }
