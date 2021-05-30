@@ -2,22 +2,30 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 
+// Best Fit implementation
 public class BestFit {
     Communication c;
 
+    // Best fit requires singleton instance communication
     public BestFit(Communication c){
         this.c = c;
     }
+
+    // throws IOException inorder to use socket, din, dout
     public void runBestFit() throws IOException{
+
+        // Send first ready
         c.sendMsg("REDY");
         String job = c.readMsg();
+
+        // If the response is not none
         while(!job.contains("NONE")){
 
-            // If message contains JOBN
+            // If message indicates there is a job
             if (job.contains("JOBN")){
                 
 
-                // Split message to
+                // Split message to array of strings
                 // jobn | sub_time | job_id | estimated_time | cores | mem | disk
                 String[] jobSplit = job.split("\\s");
 
@@ -30,7 +38,7 @@ public class BestFit {
                 String server = c.readMsg();
                 String[] serverSplit = server.split("\\s");
 
-                // Creat list of servers
+                // Create list of capable servers 
                 ArrayList<Server> serverList = new ArrayList<Server>();
                 for (int i = 0; i < serverSplit.length; i += 9){
                     if ((serverSplit.length - i) >= 9){
@@ -48,16 +56,18 @@ public class BestFit {
                     }
                 }
 
-                // Least fitness value = first item in server
+                // Least fitness value
+                //   initialising as first server fitness value
                 int leastFit = serverList.get(0).getCore() - Integer.parseInt(jobSplit[4]);
+                // Server with least fitness value
                 Server bestServer = serverList.get(0);
 
                 // For each server, find fitness (server core - job cores),
-                // if current server fitness value is smaller than current server OR server has less waiting jobs
-                // leastFit becomes current server / hold new best server
-          
+                //   eventually finds server with smallest fitness value
+                //   tries to match servers with jobs that have similar/same cores
                 for(Server i : serverList){
                     int fitnessValue = i.getCore() - Integer.parseInt(jobSplit[4]);
+                    // If lowest fitness value is negative, grab next server until positive
                     if (leastFit < 0){ 
                         leastFit = fitnessValue;
                         bestServer = i;
@@ -71,10 +81,12 @@ public class BestFit {
                 c.sendMsg("OK");
                 c.readMsg();
 
+                // Schedule job with best matching server
                 c.sendMsg("SCHD " + jobSplit[2] + " " + bestServer.getServerType() + " " + bestServer.getServerID());
                 c.readMsg();
             }
 
+            // Send server the client is REDY for next job
             c.sendMsg("REDY");
             job = c.readMsg();
         }

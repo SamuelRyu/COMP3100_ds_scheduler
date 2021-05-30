@@ -1,2 +1,4 @@
 *.class
 *.txt
+ds-system.xml
+ds-jobs.xml

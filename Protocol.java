@@ -2,12 +2,14 @@ import java.io.*;
 import java.net.*;
 
 // Singleton Design pattern that allows all classes to access the same Protocol
-//  Protocol a single socket, din, and dout
+//  Protocol is a single socket, din, and dout
 public class Protocol{
     Socket s;
     DataInputStream din;
     DataOutputStream dout;
 
+
+    // Create a single instance of our protocol object
     private static Protocol instance = new Protocol();
 
     // private constructor ensures only one Protocol is created
