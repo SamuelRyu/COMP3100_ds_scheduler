@@ -2,13 +2,13 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 
-public class CustomFit {
+public class PrioritiseIdle {
     Communication c;
 
-    public CustomFit(Communication c){
+    public PrioritiseIdle(Communication c){
         this.c = c;
     }
-    public void runCustomFit() throws IOException{
+    public void runPrioritiseIdle() throws IOException{
         c.sendMsg("REDY");
         String job = c.readMsg();
         while(!job.contains("NONE")){
@@ -32,7 +32,7 @@ public class CustomFit {
 
                 String[] serverSplit = server.split("\\s");
 
-                // Create list of servers
+                // Creat list of servers
                 ArrayList<Server> serverList = new ArrayList<Server>();
                 for (int i = 0; i < serverSplit.length; i += 9){
                     if ((serverSplit.length - i) >= 9){
@@ -50,17 +50,12 @@ public class CustomFit {
                     }
                 }
 
+                // Create deep copied array of server list
                 ArrayList<Server> deepCopy = new ArrayList<Server>();
 
                 for (Server s: serverList){
                     deepCopy.add(new Server(s.getServerType(), s.getServerID(), s.getState(), s.getCurStartTime(), s.getCore(), s.getMem(), s.getDisk(), s.getWJobs(), s.getRJobs()));
                 }
-
-                // deepCopy.removeIf(s -> s.getRJobs() > 0 && s.getWJobs() == 0 && (s.getCore() - Integer.parseInt(jobSplit[4]) > 0));
-                
-                // if (deepCopy.size() > 0){
-                //     serverList.removeIf(s -> s.getRJobs() > 0 && s.getWJobs() == 0 && (s.getCore() - Integer.parseInt(jobSplit[4]) > 0));
-                // }
 
                 // Least fitness value
                 //  Starts with first server
@@ -84,56 +79,17 @@ public class CustomFit {
                     }
                     
                 }
-                int l = leastFit;
-                deepCopy.removeIf(s -> s.getCore() - Integer.parseInt(jobSplit[4]) != l);
-                
-                Integer leastWait = null;
-                Server leastServer = null;
-                for (Server s: deepCopy){
-                    c.sendMsg("LSTJ " + s.getServerType() + " " + s.getServerID());
-                    c.readMsg();
-                    c.sendMsg("OK");
-                    String check = c.readMsg();
-                    
-                    Integer rWait = 0;
-                    Integer wWait = 0;
-                    while(!check.contains(".")){
-                        c.sendMsg("OK");
-                        check = c.readMsg();
-                        String[] servJobSplit = check.split("\\s");
-                        if (servJobSplit.length >= 7){
-                            if (Integer.parseInt(servJobSplit[1]) == 1){
-                                wWait += Integer.parseInt(servJobSplit[4]);
-                            } else {
-                                rWait += Integer.parseInt(servJobSplit[4]);
-                            }
-                        }
-                        
-                    }
-                    if (leastWait == null){
-                        if (wWait > 0){
-                            leastWait = wWait;
-                            leastServer = s;
-                        } else {
-                            leastWait = rWait;
-                            leastServer = s;
-                        }
-                    } else {
-                        if (wWait > 0 && wWait < leastWait){
-                            wWait = leastWait;
-                            leastServer = s;
-                        } else if (rWait < leastWait){
-                            leastWait = rWait;
-                            leastServer = s;
-                        }
-                    }
-                }
 
+                int l = leastFit;
+                
+                deepCopy.removeIf(s -> s.getCore() - Integer.parseInt(jobSplit[4]) != l && !s.getState().contains("idle"));
+                if(deepCopy.size() > 0){
+                    bestServer = deepCopy.get(0);
+                }
 
                 c.sendMsg("SCHD " + jobSplit[2] + " " + bestServer.getServerType() + " " + bestServer.getServerID());
                 c.readMsg();
-            }
-
+            } 
             c.sendMsg("REDY");
             job = c.readMsg();
         }
