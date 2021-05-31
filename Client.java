@@ -24,11 +24,9 @@ class Client {
             System.exit(1);
         }
         
-        // Choose Algorithm
-        if (alg.equals("-bf")){
-            BestFit f = new BestFit(c);
-            f.runBestFit();
-        } else if (alg.equals("-pi")){
+        // Chooses algorithm based on arguments
+        //   creates object with initialised communication and runs object's method
+        if (alg.equals("-pi")){
             PrioritiseIdle f = new PrioritiseIdle(c);
             f.runPrioritiseIdle();
         }
@@ -41,8 +39,8 @@ class Client {
             System.exit(1);
         }
         
+        // End program
         c.sendMsg("QUIT");
-        
         p.close();
     }
 
